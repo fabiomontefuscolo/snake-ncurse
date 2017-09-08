@@ -1,7 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <ncurses.h>
 #include <cstdlib>
+#include <iostream>
+#include <ncurses.h>
+#include <unistd.h>
+#include <vector>
+using namespace std;
 
 #ifndef SNAKE_H
 #define SNAKE_H

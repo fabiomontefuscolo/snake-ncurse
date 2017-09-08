@@ -30,6 +30,7 @@ snakeclass::snakeclass()
     food.x = 0;
     food.y = 0;
 
+    // mount snake body
     for (int i = 0; i < 5; i++)
     {
         snake.push_back(snakepart(40 + i, 10));
@@ -42,27 +43,46 @@ snakeclass::snakeclass()
     srand(time(0));
     putfood();
 
+    // horizontal upper boundary
+    for (int i = 0; i < maxwidth - 1; i++)
+    {
+        move(0, i);
+        addch(oldalchar);
+    }
+
+    // horizontal bottom boundary
     for (int i = 0; i < maxwidth - 1; i++)
     {
         move(maxheight - 2, i);
         addch(oldalchar);
     }
 
+    // vertical left boundary
     for (int i = 0; i < maxheight - 1; i++)
     {
         move(i, 0);
         addch(oldalchar);
     }
 
+    // vertical right boundary
+    for (int i = 0; i < maxheight - 1; i++)
+    {
+        move(i, maxwidth - 1);
+        addch(oldalchar);
+    }
+
+    // snake body
     for (int i = 0; i < snake.size(); i++)
     {
         move(snake[i].y, snake[i].x);
         addch(partchar);
     }
 
+    // score
     move(maxheight - 1, 0);
     printw("%d", points);
 
+    // the first food
     move(food.y, food.x);
     addch(foo);
 
@@ -83,6 +103,7 @@ void snakeclass::putfood()
         int tmpx = rand() % maxwidth + 1;
         int tmpy = rand() % maxheight + 1;
 
+        // don't put food over the snake
         for (int i = 0; i < snake.size(); i++)
         {
             if (snake[i].x == tmpx && snake[i].y == tmpy)
@@ -91,17 +112,20 @@ void snakeclass::putfood()
             }
         }
 
+        // don't put food outside boundaries
         if (tmpx >= maxwidth - 2 || tmpy >= maxheight - 3)
         {
             continue;
         }
 
+        // new food position
         food.x = tmpx;
         food.y = tmpy;
 
         break;
     }
 
+    // print food
     move(food.y, food.x);
     addch(foo);
     refresh();
@@ -109,11 +133,13 @@ void snakeclass::putfood()
 
 bool snakeclass::collision()
 {
+    // snake hit boundaries
     if (snake[0].x == 0 || snake[0].x == maxwidth - 1 || snake[0].y == 0 || snake[0].y == maxheight - 2 )
     {
         return true;
     }
 
+    // snake hit itself
     for (int i = 2; i < snake.size(); i++)
     {
         if (snake[0].x == snake[i].x && snake[0].y == snake[i].y)
@@ -122,6 +148,7 @@ bool snakeclass::collision()
         }
     }
 
+    // snake hit food
     if (snake[0].x == food.x && snake[0].y == food.y)
     {
         get = true;
@@ -191,19 +218,19 @@ void snakeclass::movesnake()
 
     if (direction == 'l')
     {
-        snake.insert(snake.begin(), snakepart(snake[0].x - 1, snake[1].y));
+        snake.insert(snake.begin(), snakepart(snake[0].x - 1, snake[0].y));
     }
     else if (direction == 'r')
     {
-        snake.insert(snake.begin(), snakepart(snake[0].x + 1, snake[1].y));
+        snake.insert(snake.begin(), snakepart(snake[0].x + 1, snake[0].y));
     }
     else if (direction == 'u')
     {
-        snake.insert(snake.begin(), snakepart(snake[0].x, snake[1].y - 1));
+        snake.insert(snake.begin(), snakepart(snake[0].x, snake[0].y - 1));
     }
     else if (direction == 'd')
     {
-        snake.insert(snake.begin(), snakepart(snake[0].x, snake[1].y + 1));
+        snake.insert(snake.begin(), snakepart(snake[0].x, snake[0].y + 1));
     }
 
     move(snake[0].y, snake[0].x);
@@ -211,3 +238,24 @@ void snakeclass::movesnake()
     refresh();
 }
 
+void snakeclass::start()
+{
+    while (true)
+    {
+        if (collision())
+        {
+            move(maxheight / 2, maxwidth / 2);
+            printw("Game over!");
+            break;
+        }
+
+        movesnake();
+
+        if (direction == 'q')
+        {
+            break;
+        }
+
+        usleep(del);
+    }
+}
